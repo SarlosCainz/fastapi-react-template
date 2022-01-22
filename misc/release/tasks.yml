@@ -1,0 +1,24 @@
+- hosts: all
+  vars:
+    dest_dir: "{{docker_dir}}/{{container_name}}"
+    src_dir: ../
+    registry: sarlos
+    container_name: fastapi-react-template
+  tasks:
+    - name: create directory
+      file:
+        path: "{{ dest_dir }}"
+        state: directory
+        mode: 0755
+
+    - name: create docker-compose.yml
+      template:
+        src: docker-compose.j2
+        dest: "{{dest_dir}}/docker-compose.yml"
+        mode: 0644
+
+    - name: Start container
+      docker_compose:
+        project_src: "{{ dest_dir }}"
+        pull: yes
+        state: present
