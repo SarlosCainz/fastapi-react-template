@@ -8,9 +8,9 @@ function Header() {
             <Navbar color="light" fixed="top">
                 <Navbar.Brand>
                     <Navbar.Item mx={3} href="/">
-                        <img src={logo} alt="SpeedTest"/>
+                        <img src={logo} alt="FastAPI-React-Template"/>
                         <Heading ml={2} size={4} textColor="grey-dark" display="flex">
-                            FastAPI-React-Template
+                            FastAPI-React-Template for BULMA
                         </Heading>
                     </Navbar.Item>
                 </Navbar.Brand>
