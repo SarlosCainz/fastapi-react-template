@@ -1,5 +1,5 @@
 import {useContext, useEffect, useState} from "react";
-import {Block, Box, Element} from "react-bulma-components";
+import {Container, Typography} from "@mui/material"
 import axios from "axios";
 
 import {AppContext} from "../app";
@@ -22,11 +22,9 @@ function Body() {
     }, []);
 
     return (
-        <Block>
-            <Box>
-                <Element>{data}</Element>
-            </Box>
-        </Block>
+        <Container sx={{mt: 1}}>
+            <Typography>{data}</Typography>
+        </Container>
     );
 }
 

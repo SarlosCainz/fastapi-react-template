@@ -1,20 +1,29 @@
-import {Navbar, Heading} from "react-bulma-components";
-import logo from "../../icon-192.png";
-
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import Toolbar from "@mui/material/Toolbar";
+import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+import MenuIcon from '@mui/icons-material/Menu';
+import logo from "../../icon-192.png"
 
 function Header() {
     return (
         <>
-            <Navbar color="light" fixed="top">
-                <Navbar.Brand>
-                    <Navbar.Item mx={3} href="/">
-                        <img src={logo} alt="SpeedTest"/>
-                        <Heading ml={2} size={4} textColor="grey-dark" display="flex">
-                            FastAPI-React-Template
-                        </Heading>
-                    </Navbar.Item>
-                </Navbar.Brand>
-            </Navbar>
+            <Box sx={{flexGrow: 1}}>
+                <AppBar position="static">
+                    <Toolbar>
+                        <IconButton size="large" edge="start" color="inherit" aria-label="menu" sx={{mr: 2}}>
+                            <MenuIcon/>
+                        </IconButton>
+                        <img src={logo} alt="logo" style={{width: "32px", marginRight: "8px"}}/>
+                        <Typography variant="h6" component="div" sx={{flexGrow: 1}}>
+                            FastAPI-React-Template for MUI
+                        </Typography>
+                        <Button color="inherit">Login</Button>
+                    </Toolbar>
+                </AppBar>
+            </Box>
         </>
     );
 }
