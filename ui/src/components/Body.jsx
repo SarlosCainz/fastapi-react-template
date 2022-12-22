@@ -1,24 +1,28 @@
 import {useContext, useEffect, useState} from "react";
 import {Container, Typography} from "@mui/material"
-import axios from "axios";
 
-import {AppContext} from "../app";
-
+import {AppContext, UserContext} from "../app";
+import * as util from "../util";
 
 function Body() {
     const appContext = useContext(AppContext);
+    const userContext = useContext(UserContext);
+
     const [data, setData] = useState("");
 
     useEffect(() => {
-        axios.get(appContext.api_url + "hello")
-            .then( res => {
-                if (res.status === 200) {
-                    setData(res.data.message);
-                }
-            })
-            .catch( err => {
-                alert(err);
-            });
+        const config = {
+            method: "get",
+            url: "hello"
+        };
+        (async () => {
+            try {
+                const res = await util.request(config, userContext);
+                setData(res.data.message);
+            } catch (err) {
+                appContext.completed.err(err);
+            }
+        })();
     }, []);
 
     return (

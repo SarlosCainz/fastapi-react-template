@@ -8,6 +8,12 @@ verify_ssl = true
 [packages]
 fastapi = "*"
 uvicorn = {extras = ["standard"], version = "*"}
+fastapi-utils = "*"
+python-jose = {extras = ["cryptography"], version = "*"}
+python-multipart = "*"
+boto3 = "*"
+gunicorn = "*"
+pydantic = "*"
 
 [requires]
 python_version = "3.9"

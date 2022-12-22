@@ -1,29 +1,74 @@
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
-import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
+import {useContext, useState} from "react";
+import {AppBar, Avatar, Toolbar, IconButton,
+        Typography, Button, Menu, MenuItem,
+        Dialog, DialogContent} from "@mui/material";
 import MenuIcon from '@mui/icons-material/Menu';
-import logo from "../../icon-192.png"
+import {indigo} from '@mui/material/colors';
 
-function Header() {
+import {UserContext} from "../app";
+import Login from "./Login";
+import * as util from "../util";
+
+function LoginButton() {
+    const [open, setOpen] = useState(false);
+
+    const handleClickLogin = () => setOpen(true)
+    const handleClose = () => setOpen(false);
+
     return (
         <>
-            <Box sx={{flexGrow: 1}}>
-                <AppBar position="static">
-                    <Toolbar>
-                        <IconButton size="large" edge="start" color="inherit" aria-label="menu" sx={{mr: 2}}>
-                            <MenuIcon/>
-                        </IconButton>
-                        <img src={logo} alt="logo" style={{width: "32px", marginRight: "8px"}}/>
-                        <Typography variant="h6" component="div" sx={{flexGrow: 1}}>
-                            FastAPI-React-Template for MUI
-                        </Typography>
-                        <Button color="inherit">Login</Button>
-                    </Toolbar>
-                </AppBar>
-            </Box>
+            <Button color="inherit" onClick={handleClickLogin}>Login</Button>
+            <Dialog open={open} onClose={handleClose}>
+                <DialogContent>
+                    <Login/>
+                </DialogContent>
+            </Dialog>
+        </>
+    );
+}
+
+function UserMenu() {
+    const userContext = useContext(UserContext);
+    const [anchorProfileMenuEl, setAnchorProfileMenuEl] = useState(null);
+    const profileMenuOpen = Boolean(anchorProfileMenuEl);
+
+    const handleClickAvatar = (e) => setAnchorProfileMenuEl(e.currentTarget);
+    const handleMenuClose = () => setAnchorProfileMenuEl(null);
+    const doLogout = () => {
+        handleMenuClose();
+        userContext.logout();
+    }
+
+    return (
+        <>
+            <Avatar onClick={handleClickAvatar}
+                    sx={{m: 2, bgcolor: indigo[600], width: 35, height: 35}}>
+                <Typography>{util.initial(userContext.info.full_name)}</Typography>
+            </Avatar>
+            <Menu id="user-menu" anchorEl={anchorProfileMenuEl} open={profileMenuOpen} onClose={handleMenuClose}>
+                <MenuItem>{userContext.info.full_name}</MenuItem>
+                <MenuItem onClick={doLogout}>Logout</MenuItem>
+            </Menu>
+        </>
+    );
+}
+function Header() {
+    const userContext = useContext(UserContext);
+
+    return (
+        <>
+            <AppBar>
+                <Toolbar>
+                    <IconButton size="large" edge="start" color="inherit" aria-label="menu" sx={{mr: 1}}>
+                        <MenuIcon/>
+                    </IconButton>
+                    <Typography variant="h6" component="div" sx={{flexGrow: 1}}>
+                        FastAPI-React-Template for MUI
+                    </Typography>
+                    {userContext.loggedIn ? <UserMenu/> : <LoginButton/>}
+                </Toolbar>
+            </AppBar>
+            <Toolbar/>
         </>
     );
 }
