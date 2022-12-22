@@ -52,15 +52,33 @@ function UserMenu() {
         </>
     );
 }
+
+function FooMenu(props) {
+    const {onClose} = props;
+
+    const handleClick = () => {
+        onClose();
+    }
+
+    return (
+        <MenuItem onClick={handleClick}><Typography>foo</Typography></MenuItem>
+    )
+}
 function Header() {
     const userContext = useContext(UserContext);
+
+    const [anchorMenuEl, setAnchorMenuEl] = useState(null);
+    const menuOpen = Boolean(anchorMenuEl);
+
+    const handleMenuClick = (e) => setAnchorMenuEl(e.currentTarget)
+    const handleMenuClose = () => setAnchorMenuEl(null)
 
     return (
         <>
             <AppBar>
                 <Toolbar>
                     <IconButton size="large" edge="start" color="inherit" aria-label="menu" sx={{mr: 1}}>
-                        <MenuIcon/>
+                        <MenuIcon onClick={handleMenuClick}/>
                     </IconButton>
                     <Typography variant="h6" component="div" sx={{flexGrow: 1}}>
                         FastAPI-React-Template for MUI
@@ -69,6 +87,9 @@ function Header() {
                 </Toolbar>
             </AppBar>
             <Toolbar/>
+            <Menu open={menuOpen} anchorEl={anchorMenuEl} onClose={handleMenuClose}>
+                <FooMenu onClose={handleMenuClose}/>
+            </Menu>
         </>
     );
 }
