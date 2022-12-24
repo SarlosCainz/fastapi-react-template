@@ -5,7 +5,7 @@ import hashlib
 import json
 from typing import List
 
-from fastapi import APIRouter, Depends, status, HTTPException, Form
+from fastapi import APIRouter, Depends, status, HTTPException, Form, Query
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt, jwk
 from jose.utils import base64url_decode
@@ -153,10 +153,21 @@ def get_groups(token: str) -> List:
 
 
 async def get_valid_token(token: str = Depends(oauth2_scheme)) -> str:
+    try:
+        return await validate_token(token)
+    except HTTPException as ex:
+        ex.headers = {"WWW-Authenticate": "Bearer"}
+        raise ex
+
+
+async def get_valid_token_by_query(token: str = Query()) -> str:
+    return await validate_token(token)
+
+
+async def validate_token(token: str) -> str:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
     )
 
     try:

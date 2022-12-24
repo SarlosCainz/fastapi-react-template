@@ -1,7 +1,7 @@
 import {useContext, useState} from "react";
 import {AppBar, Avatar, Toolbar, IconButton,
         Typography, Button, Menu, MenuItem,
-        Dialog, DialogContent} from "@mui/material";
+        Dialog, DialogTitle, DialogContent} from "@mui/material";
 import MenuIcon from '@mui/icons-material/Menu';
 import {indigo} from '@mui/material/colors';
 
@@ -53,9 +53,7 @@ function UserMenu() {
     );
 }
 
-function FooMenu(props) {
-    const {onClose} = props;
-
+export function FooMenu({onClose}) {
     const handleClick = () => {
         onClose();
     }
@@ -64,6 +62,7 @@ function FooMenu(props) {
         <MenuItem onClick={handleClick}><Typography>foo</Typography></MenuItem>
     )
 }
+
 function Header() {
     const userContext = useContext(UserContext);
 

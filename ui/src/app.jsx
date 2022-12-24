@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useState} from 'react';
-import {Snackbar, Alert} from '@mui/material';
+import {Snackbar, Alert, Dialog, DialogTitle, Typography, DialogContent} from '@mui/material';
 
 import Header from "./components/Header";
 import Body from "./components/Body";
@@ -8,6 +8,17 @@ import * as models from "./models";
 
 export const AppContext = React.createContext();
 export const UserContext = React.createContext();
+
+export function SimpleDialog({open, onClose, title, children}) {
+    return (
+        <Dialog open={open} onClose={onClose}>
+            <DialogTitle><Typography>{title}</Typography></DialogTitle>
+            <DialogContent>
+                {children}
+            </DialogContent>
+        </Dialog>
+    )
+}
 
 export function UserProvider({children}) {
     const [accessToken, setAccessToken] = useState(util.getAccessTokeh());
