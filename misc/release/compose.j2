@@ -1,0 +1,21 @@
+services:
+  {{ container_name }}:
+    image: {{ registry }}/{{ container_name }}:{{ image_tag }}
+    container_name: {{ container_name }}
+    environment:
+      - VIRTUAL_HOST={{host_name}}
+      - auth_client_id=${auth_client_id}
+      - auth_client_secret=${auth_client_secret}
+      - auth_pool_id=${auth_pool_id}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    volumes:
+      - {{ dest_dir }}/jwks.json:/app/jwks.json:ro
+    networks:
+      - nginx
+    restart: unless-stopped
+
+networks:
+  nginx:
+    name: nginx_default
+    external: true

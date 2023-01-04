@@ -15,5 +15,5 @@ if settings.allow_origin is not None:
 logger = util.get_logger()
 
 
-app.include_router(auth_router, tags=["auth"], prefix="/auth")
-app.include_router(common_router, tags=["common"])
+app.include_router(auth_router, tags=["auth"], prefix="/api/auth")
+app.include_router(common_router, tags=["common"], prefix="/api")

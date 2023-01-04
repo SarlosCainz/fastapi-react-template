@@ -1,16 +1,20 @@
-FROM sarlos/python:3.10
+FROM sarlos/python:3.9-pipenv
+
+ENV APP_DIR /app
 
 RUN apt-get update \
  && apt-get install -y nginx \
  && apt-get clean
-RUN pip3 install fastapi uvicorn[standard] gunicorn
 
 RUN mkdir /var/www/ui
 COPY ui/dist /var/www/ui/
 COPY misc/nginx.conf /etc/nginx/
 
-WORKDIR /app
-COPY api ./
+WORKDIR $APP_DIR
+COPY Pipfile Pipfile.lock $APP_DIR/
+RUN pipenv install --system
+
+COPY api $APP_DIR/
 
 EXPOSE 80
 

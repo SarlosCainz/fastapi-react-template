@@ -1,0 +1,6 @@
+all:
+  hosts:
+    docker:
+      ansible_python_interpreter: /usr/bin/python3
+      host_name: frt.home.sarlos.jp
+      docker_dir: /opt/docker

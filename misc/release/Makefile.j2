@@ -1,0 +1,13 @@
+restart: down up logs
+update: down pull up logs
+
+down:
+	docker compose down
+pull:
+	docker compose pull
+up:
+	docker compose up -d
+logs:
+	docker compose logs -f
+sh:
+	docker compose exec {{ container_name }} /bin/bash

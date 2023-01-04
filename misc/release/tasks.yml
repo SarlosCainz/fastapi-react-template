@@ -1,9 +1,8 @@
 - hosts: all
   vars:
     dest_dir: "{{docker_dir}}/{{container_name}}"
-    src_dir: ../
-    registry: sarlos
-    container_name: fastapi-react-template
+    src_dir: ..
+    jwks_json: "{{ src_dir }}/jwks.json"
   tasks:
     - name: create directory
       file:
@@ -11,11 +10,37 @@
         state: directory
         mode: 0755
 
-    - name: create docker-compose.yml
+    - name: create compose.yml
       template:
-        src: docker-compose.j2
-        dest: "{{dest_dir}}/docker-compose.yml"
+        src: compose.j2
+        dest: "{{dest_dir}}/compose.yml"
         mode: 0644
+
+    - name: create Makefile
+      template:
+        src: Makefile.j2
+        dest: "{{dest_dir}}/Makefile"
+        mode: 0644
+
+    - name: copy jwks.json
+      copy:
+        src: "{{ jwks_json }}"
+        dest: "{{ dest_dir }}/jwks.json"
+
+    - name: check file .env
+      stat:
+        path: "{{ dest_dir }}.env"
+      register: check_dot_env
+
+    - name: copy .env
+      copy:
+        src: dot.env
+        dest: "{{ dest_dir }}/.env"
+      when: not check_dot_env.stat.exists
+
+    - name: install docker-compose
+      pip:
+        name: docker-compose
 
     - name: Start container
       docker_compose:

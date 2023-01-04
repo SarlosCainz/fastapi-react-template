@@ -1,13 +1,15 @@
-import React, {useContext, useEffect, useState} from 'react';
-import {Snackbar, Alert} from '@mui/material';
+import React, {useContext, useState} from 'react';
+import {Snackbar, Alert, Backdrop, CircularProgress} from '@mui/material';
+import {Helmet} from "react-helmet";
 
+import Login from "./components/Login";
 import Header from "./components/Header";
 import Body from "./components/Body";
 import * as util from "./util";
 import * as models from "./models";
 
-export const AppContext = React.createContext();
-export const UserContext = React.createContext();
+export const AppContext = React.createContext({});
+export const UserContext = React.createContext({});
 
 export function UserProvider({children}) {
     const [accessToken, setAccessToken] = useState(util.getAccessTokeh());
@@ -65,6 +67,7 @@ export function LoggedIn({children}) {
 
 function AppProvider({children}) {
     const [completedInfo, setCompletedInfo] = useState({});
+    const [backdropOpen, setBackdropOpen] = useState(false);
     const completed = Boolean(completedInfo.msg);
     const handleCompleted = () => setCompletedInfo({})
 
@@ -80,6 +83,10 @@ function AppProvider({children}) {
                 appContext.completed.set(msg, "error")
             },
         },
+        backdrop: {
+            open: () => setBackdropOpen(true),
+            close: () => setBackdropOpen(false),
+        },
     };
 
     return (
@@ -92,19 +99,25 @@ function AppProvider({children}) {
                 <Alert severity={completedInfo.severity}
                        onClose={handleCompleted}>{completedInfo.msg}</Alert>
             </Snackbar>
+            <Backdrop sx={{color: '#fff', zIndex: (theme) => theme.zIndex.modal + 1}} open={backdropOpen}>
+                <CircularProgress color="inherit"/>
+            </Backdrop>
         </>
     );
 }
 
 function App() {
+    const userContext = useContext(UserContext);
+
     return (
         <AppProvider>
-            <UserProvider>
-                <Header/>
-                <LoggedIn>
-                    <Body/>
-                </LoggedIn>
-            </UserProvider>
+            <Helmet>
+                <title>
+                    {userContext.loggedIn ? "FastAPI-React-Template for MUI" : "login"}
+                </title>
+            </Helmet>
+            <Header/>
+            {userContext.loggedIn ? <Body/> : <Login/>}
         </AppProvider>
     );
 }
