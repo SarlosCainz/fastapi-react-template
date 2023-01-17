@@ -2,20 +2,30 @@ services:
   {{ container_name }}:
     image: {{ registry }}/{{ container_name }}:{{ image_tag }}
     container_name: {{ container_name }}
+{% if host_name is not defined %}
+    ports:
+     - 80:80
+{% endif %}
     environment:
+{% if host_name is defined %}
       - VIRTUAL_HOST={{host_name}}
+{% endif %}
       - auth_client_id=${auth_client_id}
       - auth_client_secret=${auth_client_secret}
       - auth_pool_id=${auth_pool_id}
+      - auth_hosted_ui=${auth_hosted_ui}
+      - auth_redirect_uri=${auth_redirect_uri}
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
     volumes:
       - {{ dest_dir }}/jwks.json:/app/jwks.json:ro
+    restart: unless-stopped
+{% if host_name is defined %}
     networks:
       - nginx
-    restart: unless-stopped
 
 networks:
   nginx:
     name: nginx_default
     external: true
+{% endif %}

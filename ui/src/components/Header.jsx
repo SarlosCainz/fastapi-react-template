@@ -4,7 +4,7 @@ import {AppBar, Avatar, Toolbar, IconButton,
 import MenuIcon from '@mui/icons-material/Menu';
 import {indigo} from '@mui/material/colors';
 
-import {UserContext} from "../app";
+import {UserContext, LoggedIn} from "../app";
 import {FooMenu} from "./Foo";
 import * as util from "../util";
 
@@ -54,13 +54,17 @@ function Header() {
                     <Typography variant="h6" component="div" sx={{flexGrow: 1}}>
                         FastAPI-React-Template for MUI
                     </Typography>
-                    {userContext.loggedIn && <UserMenu/>}
+                    <LoggedIn>
+                        <UserMenu/>
+                    </LoggedIn>
                 </Toolbar>
             </AppBar>
             <Toolbar/>
-            <Menu open={menuOpen} anchorEl={anchorMenuEl} onClose={handleMenuClose}>
-                <FooMenu onClose={handleMenuClose}/>
-            </Menu>
+            <LoggedIn>
+                <Menu open={menuOpen} anchorEl={anchorMenuEl} onClose={handleMenuClose}>
+                    <FooMenu onClose={handleMenuClose}/>
+                </Menu>
+            </LoggedIn>
         </>
     );
 }

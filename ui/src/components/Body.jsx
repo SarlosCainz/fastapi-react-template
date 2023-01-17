@@ -1,5 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
-import {Container} from "@mui/material"
+import {Container, Typography} from "@mui/material"
 
 import Main from "./Main";
 import Foo from "./Foo";

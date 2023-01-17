@@ -12,6 +12,8 @@ class Result(BaseModel):
 
 
 class Token(BaseModel):
+    username: str = None
+    id_token: str = None
     access_token: str = None
     refresh_token: str = None
     token_type: str = None
@@ -23,6 +25,7 @@ class User(BaseModel):
     username: str
     email: Union[str, None] = None
     full_name: Union[str, None] = None
+    picture: str = None
     groups: List[str] = None
 
 

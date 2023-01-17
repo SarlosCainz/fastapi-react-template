@@ -1,4 +1,4 @@
 #!/bin/bash
 
 nginx
-gunicorn app:app -w 4 -k uvicorn.workers.UvicornWorker
+exec gunicorn app:app -w 2 -k uvicorn.workers.UvicornWorker

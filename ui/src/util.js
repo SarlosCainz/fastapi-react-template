@@ -55,7 +55,11 @@ export const request = async (config, userContext, auth=true) => {
 export const getUser = () => {
     let user = localStorage.getItem("user");
     if (user) {
-        user = JSON.parse(user);
+        try {
+            user = JSON.parse(user);
+        } catch (err) {
+            user = models.User;
+        }
     } else {
         user = models.User;
     }
@@ -71,8 +75,7 @@ export const setUser = (user) => {
 }
 
 export const getAccessTokeh = () => {
-    const accessToken = sessionStorage.getItem("accessToken");
-    return accessToken;
+    return sessionStorage.getItem("accessToken");
 }
 export const setAccessToken = (accessToken) => {
     if (accessToken === null) {

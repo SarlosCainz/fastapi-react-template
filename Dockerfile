@@ -6,6 +6,11 @@ RUN apt-get update \
  && apt-get install -y nginx \
  && apt-get clean
 
+RUN set -eux \
+ && rm -r /var/log/nginx/*.log \
+ && ln -s /dev/stdout /var/log/nginx/access.log \
+ && ln -s /dev/stderr /var/log/nginx/error.log
+
 RUN mkdir /var/www/ui
 COPY ui/dist /var/www/ui/
 COPY misc/nginx.conf /etc/nginx/
@@ -18,10 +23,5 @@ COPY api $APP_DIR/
 
 EXPOSE 80
 
-RUN set -eux \
- && rm -r /var/log/nginx/*.log \
- && ln -s /dev/stdout /var/log/nginx/access.log \
- && ln -s /dev/stderr /var/log/nginx/error.log
-
 COPY misc/entrypoint.sh /
-ENTRYPOINT /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]

@@ -1,4 +1,5 @@
 import {useContext, useEffect, useState} from "react";
+import {useParams} from "react-router-dom";
 import {Typography} from "@mui/material"
 
 import {AppContext, UserContext} from "../app";
@@ -29,7 +30,9 @@ function Body() {
     }, []);
 
     return (
-        <Typography>{data}</Typography>
+        <>
+            <Typography>data = {data}</Typography>
+        </>
     );
 }
 

@@ -29,7 +29,7 @@
 
     - name: check file .env
       stat:
-        path: "{{ dest_dir }}.env"
+        path: "{{ dest_dir }}/.env"
       register: check_dot_env
 
     - name: copy .env
