@@ -12,6 +12,7 @@ export const AppContext = React.createContext({});
 export const UserContext = React.createContext({});
 
 export function UserProvider({children}) {
+    const [idToken, setIdToken] = useState(util.getIdTokeh());
     const [accessToken, setAccessToken] = useState(util.getAccessTokeh());
     const [user, setUser] = useState(util.getUser());
     const [loggedIn, setLoggedIn] = useState(Boolean(accessToken));
@@ -19,14 +20,17 @@ export function UserProvider({children}) {
     const userContext = {
         loggedIn: loggedIn,
         info: user,
+        idToken: idToken,
+        setIdToken: setIdToken,
         accessToken: accessToken,
         setAccessToken: setAccessToken,
-        login: (user, access_token, refresh_token) => {
+        login: (user, id_token, access_token, refresh_token) => {
             setUser(user);
             setAccessToken(access_token);
             setLoggedIn(true);
 
             util.setUser(user);
+            util.setIdToken(id_token);
             util.setAccessToken(access_token);
             util.setRefreshToken(refresh_token);
 
@@ -42,6 +46,7 @@ export function UserProvider({children}) {
         logout: () => {
             console.log("logout");
             setUser(models.User);
+            setIdToken(null);
             setAccessToken(null);
             setLoggedIn(false);
             util.setUser(null);
@@ -148,7 +153,7 @@ function App() {
                     try {
                         const res = await util.request(config, userContext, false);
                         const data = res.data
-                        userContext.login(data.username, data.access_token, data.refresh_token);
+                        userContext.login(data.username, data.id_token, data.access_token, data.refresh_token);
                         navigate("/");
                     } catch (err) {
                         console.log(err);

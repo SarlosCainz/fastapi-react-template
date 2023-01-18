@@ -33,6 +33,7 @@ export const request = async (config, userContext, auth=true) => {
                 }
                 try {
                     const res = await axios(refreshConfig);
+                    userContext.setIdToken(res.data.id_token);
                     userContext.setAccessToken(res.data.access_token);
                     config.headers.Authorization = "Bearer " + res.data.access_token;
                 } catch(err) {
@@ -71,6 +72,17 @@ export const setUser = (user) => {
         localStorage.removeItem("user");
     } else {
         localStorage.setItem("user", JSON.stringify(user));
+    }
+}
+
+export const getIdTokeh = () => {
+    return sessionStorage.getItem("idToken");
+}
+export const setIdToken = (idToken) => {
+    if (idToken === null) {
+        sessionStorage.removeItem("idToken");
+    } else {
+        sessionStorage.setItem("idToken", idToken);
     }
 }
 
