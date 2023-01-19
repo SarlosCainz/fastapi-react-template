@@ -11,22 +11,22 @@ class Result(BaseModel):
         return self.rc != 0
 
 
-class Token(BaseModel):
-    username: str = None
-    id_token: str = None
-    access_token: str = None
-    refresh_token: str = None
-    token_type: str = None
-    challenge_name: Optional[str]
-    session: Optional[str]
-
-
 class User(BaseModel):
     username: str
     email: Union[str, None] = None
     full_name: Union[str, None] = None
     picture: str = None
     groups: List[str] = None
+
+
+class Token(BaseModel):
+    user: User
+    id_token: str = None
+    access_token: str = None
+    refresh_token: str = None
+    token_type: str = None
+    challenge_name: Optional[str]
+    session: Optional[str]
 
 
 JWK = Dict[str, str]

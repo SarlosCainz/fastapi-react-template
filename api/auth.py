@@ -71,7 +71,7 @@ async def callback(code: str = Form()):
     user = get_user(access_token)
 
     token = models.Token(
-        username = user.username,
+        user = user,
         id_token=result.get("id_token"),
         access_token=access_token,
         refresh_token=result.get("refresh_token"),
@@ -141,6 +141,10 @@ def get_groups(token: str) -> List:
 
 
 async def get_valid_token(token: str = Depends(oauth2_scheme)) -> str:
+    return await parse_token(token)
+
+
+async def parse_token(token: str) -> str:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",

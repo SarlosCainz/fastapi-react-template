@@ -140,11 +140,12 @@ function App() {
         }
         console.log(location);
         if (location.pathname === "/login") {
-            const match = location.search.match(/code=(?<code>[^&]+)/);
-            if (match) {
+            const code_match = location.search.match(/code=(?<code>[^&]+)/);
+            const error_match = location.search.match(/error=(?<code>[^&]+)/);
+            if (code_match) {
                 (async () => {
                     const params = new FormData();
-                    params.append("code", match.groups.code);
+                    params.append("code", code_match.groups.code);
                     const config = {
                         method: "post",
                         url: "auth/callback",
@@ -153,7 +154,7 @@ function App() {
                     try {
                         const res = await util.request(config, userContext, false);
                         const data = res.data
-                        userContext.login(data.username, data.id_token, data.access_token, data.refresh_token);
+                        userContext.login(data.user, data.id_token, data.access_token, data.refresh_token);
                         navigate("/");
                     } catch (err) {
                         console.log(err);
