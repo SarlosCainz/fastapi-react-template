@@ -1,4 +1,6 @@
 import React, {useContext, useEffect, useState, useRef} from 'react';
+import {createTheme, ThemeProvider} from "@mui/material";
+import CssBaseline from '@mui/material/CssBaseline';
 import {useNavigate, useLocation, Navigate, Routes, Route} from "react-router-dom";
 import {Snackbar, Alert, Backdrop, CircularProgress, Typography, Link} from '@mui/material';
 import {Helmet} from "react-helmet";
@@ -129,20 +131,37 @@ function App() {
     console.log("App");
     const refFirstRef = useRef(true);
     const userContext = useContext(UserContext);
+    const [msg, setMsg] = useState("");
+    const [isDarkMode, setDarkMode] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
     console.log({location: location});
+
+    useEffect(() => {
+        const query = window.matchMedia('(prefers-color-scheme: dark)');
+        setDarkMode(query.matches);
+        query.onchange = event => setDarkMode(event.matches);
+    }, []);
+
+    const theme = createTheme({
+        palette: {
+            mode: isDarkMode ? "dark" : "light",
+        },
+    });
 
     useEffect(() => {
         if (import.meta.env.DEV && refFirstRef.current) {
             refFirstRef.current = false;
             return;
         }
+
         console.log(location);
         if (location.pathname === "/login") {
             const code_match = location.search.match(/code=(?<code>[^&]+)/);
             const error_match = location.search.match(/error=(?<code>[^&]+)/);
-            if (code_match) {
+            if (error_match) {
+                setMsg(error_match.groups.code);
+            } else if (code_match) {
                 (async () => {
                     const params = new FormData();
                     params.append("code", code_match.groups.code);
@@ -173,18 +192,22 @@ function App() {
 
     return (
         <AppProvider>
-            <Header/>
-            <LoggedIn>
-                <Body/>
-            </LoggedIn>
-            <NoLogin>
-                {location.pathname === "/logout" && (
-                    <>
-                        <Typography>ログアウトしました。</Typography>
-                        <Link href="/">Login</Link>
-                    </>
-                )}
-            </NoLogin>
+            <ThemeProvider theme={theme}>
+                <CssBaseline/>
+                <Header/>
+                <LoggedIn>
+                    <Body/>
+                </LoggedIn>
+                <NoLogin>
+                    {msg}
+                    {location.pathname === "/logout" && (
+                        <>
+                            <Typography>ログアウトしました。</Typography>
+                            <Link href="/">Login</Link>
+                        </>
+                    )}
+                </NoLogin>
+            </ThemeProvider>
         </AppProvider>
     );
 }
