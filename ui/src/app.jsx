@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState, useRef} from 'react';
 import {Snackbar, Alert, Dialog, DialogTitle, Typography, DialogContent} from '@mui/material';
 
 import Header from "./components/Header";
@@ -21,39 +21,32 @@ export function SimpleDialog({open, onClose, title, children}) {
 }
 
 export function UserProvider({children}) {
-    const [accessToken, setAccessToken] = useState(util.getAccessTokeh());
-    const [user, setUser] = useState(util.getUser());
-    const [loggedIn, setLoggedIn] = useState(Boolean(util.getRefreshTokeh()));
+    const [accessToken, setAccessToken] = useState(util.getAccessToken());
+    const [user, setUser] = useState(models.User);
+    const [loggedIn, setLoggedIn] = useState(Boolean(util.getRefreshToken()));
 
     const userContext = {
         loggedIn: loggedIn,
-        info: user,
+        userInfo: user,
+        setUser: userInfo => setUser(userInfo),
         accessToken: accessToken,
         setAccessToken: setAccessToken,
-        login: (user, access_token, refresh_token) => {
-            setUser(user);
+        login: (username, access_token, refresh_token) => {
             setAccessToken(access_token);
 
-            util.setUser(user);
             util.setAccessToken(access_token);
             util.setRefreshToken(refresh_token);
+            util.setUsername(username);
 
-            if (user && access_token) {
-                setLoggedIn(true);
-            }
-        },
-        authHeader: {
-            headers: {
-                Authorization: "Bearer " + accessToken,
-            }
+            setLoggedIn(true);
         },
         logout: () => {
             console.log("logout");
             setUser(models.User);
             setAccessToken(null);
             setLoggedIn(false);
-            util.setUser(null);
             util.setRefreshToken(null);
+            util.setUsername(null);
         }
     };
 
@@ -74,7 +67,7 @@ export function LoggedIn({children}) {
     )
 }
 
-function AppProvider({children}) {
+export function AppProvider({children}) {
     const [completedInfo, setCompletedInfo] = useState({});
     const completed = Boolean(completedInfo.msg);
     const handleCompleted = () => setCompletedInfo({})
@@ -108,15 +101,43 @@ function AppProvider({children}) {
 }
 
 function App() {
+    const appContext = useContext(AppContext);
+    const userContext = useContext(UserContext);
+
+    const refFirstRef = useRef(true);
+
+    useEffect(() => {
+        // Strictモードの開発サーバでuseEffectが2回呼ばれるのを防ぐ。
+        if (import.meta.env.DEV && refFirstRef.current) {
+            refFirstRef.current = false;
+            return;
+        }
+
+        if (userContext.loggedIn) {
+            (async () => {
+                const config = {
+                    method: "get",
+                    url: "user/me",
+                }
+                try {
+                    const res = await util.request(config, userContext);
+                    console.log(res);
+                    userContext.setUser(res.data);
+                } catch (err) {
+                    appContext.err(err);
+                }
+            })();
+        }
+
+    }, [userContext.loggedIn]);
+
     return (
-        <AppProvider>
-            <UserProvider>
-                <Header/>
-                <LoggedIn>
-                    <Body/>
-                </LoggedIn>
-            </UserProvider>
-        </AppProvider>
+        <>
+            <Header/>
+            <LoggedIn>
+                <Body/>
+            </LoggedIn>
+        </>
     );
 }
 

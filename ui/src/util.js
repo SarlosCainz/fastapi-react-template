@@ -1,9 +1,9 @@
 import axios from "axios";
-import * as models from "./models";
 
 export const request = async (config, userContext, auth=true) => {
-    const refreshToken = getRefreshTokeh();
-    if (auth && refreshToken === null) {
+    const refreshToken = getRefreshToken();
+    const username = getUsername();
+    if (auth && (refreshToken === null || username === null)) {
         userContext.logout();
         return;
     }
@@ -24,8 +24,8 @@ export const request = async (config, userContext, auth=true) => {
             console.log(err);
             if (auth === true && err.response.status === 401) {
                 const data = new URLSearchParams();
-                data.append("username", userContext.info.username);
-                data.append("refresh_token", getRefreshTokeh());
+                data.append("username", username);
+                data.append("refresh_token", refreshToken);
                 const refreshConfig = {
                     method: 'post',
                     url: import.meta.env.VITE_API_URL + "auth/refresh",
@@ -52,27 +52,19 @@ export const request = async (config, userContext, auth=true) => {
     return result;
 }
 
-export const getUser = () => {
-    let user = localStorage.getItem("user");
-    if (user) {
-        user = JSON.parse(user);
-    } else {
-        user = models.User;
-    }
-
-    return user;
+export const getUsername = () => {
+    return localStorage.getItem("username");
 }
-export const setUser = (user) => {
-    if (user === null) {
-        localStorage.removeItem("user");
+export const setUsername = (username) => {
+    if (username === null) {
+        localStorage.removeItem("username");
     } else {
-        localStorage.setItem("user", JSON.stringify(user));
+        localStorage.setItem("username", username);
     }
 }
 
-export const getAccessTokeh = () => {
-    const accessToken = sessionStorage.getItem("accessToken");
-    return accessToken;
+export const getAccessToken = () => {
+    return sessionStorage.getItem("accessToken");
 }
 export const setAccessToken = (accessToken) => {
     if (accessToken === null) {
@@ -82,9 +74,8 @@ export const setAccessToken = (accessToken) => {
     }
 }
 
-export const getRefreshTokeh = () => {
-    const refreshToken = localStorage.getItem("refreshToken");
-    return refreshToken;
+export const getRefreshToken = () => {
+    return localStorage.getItem("refreshToken");
 }
 export const setRefreshToken = (refreshToken) => {
     if (refreshToken === null) {
@@ -95,7 +86,7 @@ export const setRefreshToken = (refreshToken) => {
 }
 
 export const value2label = (value, list) => {
-    return list.reduce((p, c) => (c.value == value ? c.label : p), "");
+    return list.reduce((p, c) => (c.value === value ? c.label : p), "");
 };
 
 export const initial = (fullName) => {

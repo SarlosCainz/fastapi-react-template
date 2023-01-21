@@ -187,12 +187,15 @@ async def validate_token(token: str) -> str:
             now = int(datetime.now().timestamp())
             if now > claims["exp"]:
                 # 期限切れ
+                logger.debug("期限切れのToken")
                 credentials_exception.detail = "expired"
                 raise credentials_exception
         else:
             # 不正なトークン
+            logger.debug("不正なToken")
             raise credentials_exception
     except JWTError:
+        logger.debug("何か変だよ")
         raise credentials_exception
 
     return token

@@ -43,10 +43,10 @@ function UserMenu() {
         <>
             <Avatar onClick={handleClickAvatar}
                     sx={{m: 2, bgcolor: indigo[600], width: 35, height: 35}}>
-                <Typography>{util.initial(userContext.info.full_name)}</Typography>
+                <Typography>{util.initial(userContext.userInfo.full_name)}</Typography>
             </Avatar>
             <Menu id="user-menu" anchorEl={anchorProfileMenuEl} open={profileMenuOpen} onClose={handleMenuClose}>
-                <MenuItem>{userContext.info.full_name}</MenuItem>
+                <MenuItem>{userContext.userInfo.full_name}</MenuItem>
                 <MenuItem onClick={doLogout}>Logout</MenuItem>
             </Menu>
         </>

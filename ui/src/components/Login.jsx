@@ -1,7 +1,6 @@
 import React, {useContext, useState} from "react";
 import {
-    Box, Stack, TextField, Typography, Avatar,
-    Container, CssBaseline
+    Box, Stack, TextField, Typography, Avatar, Container
 } from "@mui/material";
 import LoadingButton from '@mui/lab/LoadingButton';
 import LockIcon from '@mui/icons-material/Lock';
@@ -39,19 +38,11 @@ function Login() {
                     data: data
                 };
                 let res = await util.request(config, userContext, false);
-                const access_token = res.data.access_token;
-                const refresh_token = res.data.refresh_token;
-                if (access_token) {
-                    const config = {
-                        method: "get",
-                        url: "user/me",
-                        headers: {
-                            Authorization: "Bearer " + access_token,
-                        }
-                    }
-                    res = await util.request(config, userContext, false);
-                    userContext.login(res.data, access_token, refresh_token);
+                if (res.data.access_token) {
+                    // ログイン成功
+                    userContext.login(username, res.data.access_token, res.data.refresh_token);
                 } else {
+                    // 新規ユーザー
                     setSession(res.data.session);
                     setUsername(username);
                 }
@@ -95,20 +86,11 @@ function Login() {
                 params.append("session", session);
                 const config = {
                     method: "post",
-                    url: "new_user",
+                    url: "auth/new_user",
                     data: params
                 };
                 let res = await util.request(config, userContext, false);
-                const access_token = res.data.access_token;
-                const refresh_token = res.data.refresh_token;
-                if (access_token) {
-                    const config = {
-                        method: "get",
-                        url: "user/me"
-                    };
-                    res = await util.request(config, userContext);
-                    userContext.login(res.data, access_token, refresh_token);
-                }
+                userContext.login(username, res.data.access_token, res.data.refresh_token);
             }
         } catch (err) {
             console.log(err)
@@ -120,7 +102,6 @@ function Login() {
 
     return (
         <Container component="main" maxWidth="xs">
-            <CssBaseline/>
             <Box sx={{marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
                 {session === null ? (
                     <>
