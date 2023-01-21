@@ -22,10 +22,14 @@ export function UserProvider({children}) {
     const userContext = {
         loggedIn: loggedIn,
         info: user,
+        setInfo: setUser,
         idToken: idToken,
         setIdToken: setIdToken,
         accessToken: accessToken,
-        setAccessToken: setAccessToken,
+        setAccessToken: (token) => {
+            setAccessToken(token);
+            util.setAccessToken(token);
+        },
         login: (user, id_token, access_token, refresh_token) => {
             setUser(user);
             setAccessToken(access_token);
@@ -86,7 +90,7 @@ export function NoLogin({children}) {
     )
 }
 
-function AppProvider({children}) {
+export function AppProvider({children}) {
     const [completedInfo, setCompletedInfo] = useState({});
     const [backdropOpen, setBackdropOpen] = useState(false);
     const completed = Boolean(completedInfo.msg);
@@ -130,6 +134,7 @@ function AppProvider({children}) {
 function App() {
     console.log("App");
     const refFirstRef = useRef(true);
+    const appContext = useContext(AppContext);
     const userContext = useContext(UserContext);
     const [msg, setMsg] = useState("");
     const [isDarkMode, setDarkMode] = useState(false);
@@ -148,6 +153,29 @@ function App() {
             mode: isDarkMode ? "dark" : "light",
         },
     });
+
+    useEffect(() => {
+        console.log("foo")
+        if (userContext.loggedIn) {
+            (async () => {
+                try {
+                    appContext.backdrop.open();
+                    const config = {
+                        method: "get",
+                        url: "user/me",
+                    }
+                    const res = await util.request(config, userContext);
+                    userContext.setInfo(res.data);
+                } catch (err) {
+                    appContext.completed.err(err);
+                } finally {
+                    appContext.backdrop.close();
+                }
+            })();
+        }
+    }, [userContext.loggedIn]);
+
+
 
     useEffect(() => {
         if (import.meta.env.DEV && refFirstRef.current) {
@@ -191,24 +219,22 @@ function App() {
     }, [location]);
 
     return (
-        <AppProvider>
-            <ThemeProvider theme={theme}>
-                <CssBaseline/>
-                <Header/>
-                <LoggedIn>
-                    <Body/>
-                </LoggedIn>
-                <NoLogin>
-                    {msg}
-                    {location.pathname === "/logout" && (
-                        <>
-                            <Typography>ログアウトしました。</Typography>
-                            <Link href="/">Login</Link>
-                        </>
-                    )}
-                </NoLogin>
-            </ThemeProvider>
-        </AppProvider>
+        <ThemeProvider theme={theme}>
+            <CssBaseline/>
+            <Header/>
+            <LoggedIn>
+                <Body/>
+            </LoggedIn>
+            <NoLogin>
+                {msg}
+                {location.pathname === "/logout" && (
+                    <>
+                        <Typography>ログアウトしました。</Typography>
+                        <Link href="/">Login</Link>
+                    </>
+                )}
+            </NoLogin>
+        </ThemeProvider>
     );
 }
 

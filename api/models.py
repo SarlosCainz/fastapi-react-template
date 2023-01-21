@@ -20,7 +20,7 @@ class User(BaseModel):
 
 
 class Token(BaseModel):
-    user: User
+    user: User = None
     id_token: str = None
     access_token: str = None
     refresh_token: str = None
