@@ -30,7 +30,10 @@ export function UserProvider({children}) {
         userInfo: user,
         setUser: userInfo => setUser(userInfo),
         accessToken: accessToken,
-        setAccessToken: setAccessToken,
+        setAccessToken: (token) => {
+            setAccessToken(token);
+            util.setAccessToken(token);
+        },
         login: (username, access_token, refresh_token) => {
             setAccessToken(access_token);
 
@@ -121,7 +124,6 @@ function App() {
                 }
                 try {
                     const res = await util.request(config, userContext);
-                    console.log(res);
                     userContext.setUser(res.data);
                 } catch (err) {
                     appContext.err(err);
