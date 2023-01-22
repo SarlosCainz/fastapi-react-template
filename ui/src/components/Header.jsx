@@ -22,7 +22,8 @@ function UserMenu() {
 
     return (
         <>
-            <Avatar onClick={handleClickAvatar}
+            <Avatar onClick={handleClickAvatar} alt={userContext.info.full_name}
+                    src={userContext.info.picture}
                     sx={{m: 2, bgcolor: indigo[600], width: 35, height: 35}}>
                 <Typography>{util.initial(userContext.info.full_name)}</Typography>
             </Avatar>
