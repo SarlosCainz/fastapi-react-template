@@ -22,6 +22,7 @@ class User(BaseModel):
 class Token(BaseModel):
     user: User = None
     id_token: str = None
+    nonce: str = None
     access_token: str = None
     refresh_token: str = None
     token_type: str = None

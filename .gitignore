@@ -116,3 +116,4 @@ fabric.properties
 ui/dist
 ui/node_modules
 /misc/jwks.json
+*.local

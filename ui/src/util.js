@@ -75,6 +75,30 @@ export const setUser = (user) => {
     }
 }
 
+export const createRandomCode = () => {
+    return btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32))));
+}
+export const getState = () => {
+    return sessionStorage.getItem("state");
+}
+export const setState = (state) => {
+    if (state === null) {
+        sessionStorage.removeItem("state");
+    } else {
+        sessionStorage.setItem("state", state);
+    }
+}
+export const getNonce = () => {
+    return sessionStorage.getItem("nonce");
+}
+export const setNonce = (nonce) => {
+    if (nonce === null) {
+        sessionStorage.removeItem("nonce");
+    } else {
+        sessionStorage.setItem("nonce", nonce);
+    }
+}
+
 export const getIdTokeh = () => {
     return sessionStorage.getItem("idToken");
 }

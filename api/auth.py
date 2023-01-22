@@ -33,32 +33,8 @@ def get_kids():
 kids = get_kids()
 
 
-@router.get("/login")
-async def login():
-    params = {
-        "client_id": settings.auth_client_id,
-        "response_type": "code",
-        "scope": "email+openid+profile",
-        "redirect_uri": settings.auth_redirect_uri,
-    }
-    url = f"{settings.auth_hosted_ui}/oauth2/authorize?{urllib.parse.urlencode(params, safe='+')}"
-
-    return RedirectResponse(url=url)
-
-
-@router.get("/logout")
-async def logout():
-    params = {
-        "client_id": settings.auth_client_id,
-        "logout_uri": settings.auth_logout_uri,
-    }
-    url = f"{settings.auth_hosted_ui}/logout?{urllib.parse.urlencode(params, safe='+')}"
-
-    return RedirectResponse(url=url)
-
-
 # Cognitoから受領した認可コードよりトークンを取得するコールバック
-@router.post("/callback", response_model=models.Token)
+@router.post("/token", response_model=models.Token)
 async def callback(code: str = Form()):
     params = {
         "grant_type": "authorization_code",
@@ -70,9 +46,16 @@ async def callback(code: str = Form()):
     access_token = result.get("access_token")
     user = get_user(access_token)
 
+    id_token = result.get("id_token")
+    nonce = None
+    if id_token:
+        claims = jwt.get_unverified_claims(id_token)
+        nonce = claims.get("nonce")
+
     token = models.Token(
         user = user,
-        id_token=result.get("id_token"),
+        id_token=id_token,
+        nonce=nonce,
         access_token=access_token,
         refresh_token=result.get("refresh_token"),
         token_type=result.get("token_type")

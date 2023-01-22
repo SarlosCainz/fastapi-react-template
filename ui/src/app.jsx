@@ -59,7 +59,10 @@ export function UserProvider({children}) {
             util.setAccessToken(null);
             util.setRefreshToken(null);
 
-            window.location.href = import.meta.env.VITE_API_URL + "auth/logout";
+            const params = new URLSearchParams();
+            params.append("client_id", import.meta.env.VITE_AUTH_CLIENT_ID);
+            params.append("logout_uri", import.meta.env.VITE_AUTH_LOGOUT_URL);
+            window.location.href = import.meta.env.VITE_AUTH_URL + "/logout?" + params;
         }
     };
 
@@ -132,15 +135,15 @@ export function AppProvider({children}) {
 }
 
 function App() {
-    console.log("App");
     const refFirstRef = useRef(true);
+
     const appContext = useContext(AppContext);
     const userContext = useContext(UserContext);
+
     const [msg, setMsg] = useState("");
     const [isDarkMode, setDarkMode] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
-    console.log({location: location});
 
     useEffect(() => {
         const query = window.matchMedia('(prefers-color-scheme: dark)');
@@ -155,7 +158,6 @@ function App() {
     });
 
     useEffect(() => {
-        console.log("foo")
         if (userContext.loggedIn) {
             (async () => {
                 try {
@@ -175,7 +177,33 @@ function App() {
         }
     }, [userContext.loggedIn]);
 
+    const callback = async (code) => {
+        const params = new FormData();
+        params.append("code", code);
+        const config = {
+            method: "post",
+            url: "auth/token",
+            data: params,
+        }
+        try {
+            const res = await util.request(config, userContext, false);
+            const data = res.data
+            const nonce = util.getNonce();
+            if (data.nonce === nonce) {
+                userContext.login(data.user, data.id_token, data.access_token, data.refresh_token);
+                navigate("/");
+            } else {
+                console.log({nonce: nonce, data: data})
+                alert("何か変だよ。")
+            }
 
+        } catch (err) {
+            console.log(err);
+            if (err.response.status === 400) {
+                window.location.href = "/"
+            }
+        }
+    };
 
     useEffect(() => {
         if (import.meta.env.DEV && refFirstRef.current) {
@@ -183,37 +211,38 @@ function App() {
             return;
         }
 
-        console.log(location);
-        if (location.pathname === "/login") {
-            const code_match = location.search.match(/code=(?<code>[^&]+)/);
-            const error_match = location.search.match(/error=(?<code>[^&]+)/);
-            if (error_match) {
-                setMsg(error_match.groups.code);
-            } else if (code_match) {
-                (async () => {
-                    const params = new FormData();
-                    params.append("code", code_match.groups.code);
-                    const config = {
-                        method: "post",
-                        url: "auth/callback",
-                        data: params,
+        if (!userContext.loggedIn) {
+            if (location.pathname === "/login") {
+                const code_match = location.search.match(/code=(?<code>[^&]+)/);
+                const state_match = location.search.match(/state=(?<state>[^&]+)/);
+                const error_match = location.search.match(/error=(?<code>[^&]+)/);
+                if (error_match) {
+                    setMsg(error_match.groups.code);
+                } else if (code_match && state_match) {
+                    const correctState = util.getState();
+                    const state = decodeURIComponent(state_match.groups.state);
+                    if (state === correctState) {
+                        (callback)(code_match.groups.code);
+                    } else {
+                        console.log({state: state, correctState: correctState});
+                        appContext.completed.set("何か変だよ?", "error");
                     }
-                    try {
-                        const res = await util.request(config, userContext, false);
-                        const data = res.data
-                        userContext.login(data.user, data.id_token, data.access_token, data.refresh_token);
-                        navigate("/");
-                    } catch (err) {
-                        console.log(err);
-                        if (err.response.status === 400) {
-                            window.location.href = "/"
-                        }
-                    }
-                })();
-            }
-        } else if (location.pathname !== "/logout") {
-            if (!userContext.loggedIn) {
-                window.location.href = import.meta.env.VITE_API_URL + "auth/login";
+                }
+            } else if (location.pathname !== "/logout") {
+                const state = util.createRandomCode();
+                util.setState(state);
+                const nonce = util.createRandomCode();
+                util.setNonce(nonce);
+
+                const params = new URLSearchParams();
+                params.append("client_id", import.meta.env.VITE_AUTH_CLIENT_ID);
+                params.append("redirect_uri", import.meta.env.VITE_AUTH_LOGIN_URL);
+                params.append("response_type", "code");
+                params.append("state", state);
+                params.append("scope", "email openid profile");
+                params.append("identity_provider", import.meta.env.VITE_AUTH_PROVIDER);
+                params.append("nonce", nonce);
+                window.location.href = import.meta.env.VITE_AUTH_URL + "/oauth2/authorize?" + params;
             }
         }
     }, [location]);
