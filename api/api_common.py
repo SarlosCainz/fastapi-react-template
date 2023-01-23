@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import Depends
+from fastapi import Depends, Form
 from fastapi_utils.inferring_router import InferringRouter
 from fastapi_utils.cbv import cbv
 
@@ -16,9 +16,9 @@ logger = util.get_logger()
 class JwtAuthCDV:
     token: str = Depends(auth.get_valid_token)
 
-    @router.get("/user/me", response_model=models.User)
-    async def c_user_me(self):
-        return auth.get_user(self.token)
+    @router.post("/user/me", response_model=models.User)
+    async def c_user_me(self, access_token: str = Form()):
+        return auth.get_user(access_token)
 
     @router.get("/hello")
     async def api_hello(self):

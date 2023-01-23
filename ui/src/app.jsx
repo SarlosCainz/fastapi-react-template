@@ -162,9 +162,12 @@ function App() {
             (async () => {
                 try {
                     appContext.backdrop.open();
+                    const params = new FormData();
+                    params.append("access_token", userContext.accessToken);
                     const config = {
-                        method: "get",
+                        method: "post",
                         url: "user/me",
+                        data: params,
                     }
                     const res = await util.request(config, userContext);
                     userContext.setInfo(res.data);

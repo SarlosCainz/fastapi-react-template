@@ -14,7 +14,7 @@ export const request = async (config, userContext, auth=true) => {
         if (!config.headers) {
             config.headers = {};
         }
-        config.headers.Authorization = "Bearer " + userContext.accessToken;
+        config.headers.Authorization = "Bearer " + userContext.idToken;
     }
     for (let i = 0; i < 2; i++) {
         try {
@@ -24,7 +24,6 @@ export const request = async (config, userContext, auth=true) => {
             console.log(err);
             if (auth === true && err.response.status === 401) {
                 const data = new URLSearchParams();
-                data.append("username", userContext.info.username);
                 data.append("refresh_token", getRefreshTokeh());
                 const refreshConfig = {
                     method: 'post',
@@ -35,7 +34,7 @@ export const request = async (config, userContext, auth=true) => {
                     const res = await axios(refreshConfig);
                     userContext.setIdToken(res.data.id_token);
                     userContext.setAccessToken(res.data.access_token);
-                    config.headers.Authorization = "Bearer " + res.data.access_token;
+                    config.headers.Authorization = "Bearer " + res.data.id_token;
                 } catch(err) {
                     if (err.response.status === 401) {
                         userContext.logout();
@@ -76,7 +75,8 @@ export const setUser = (user) => {
 }
 
 export const createRandomCode = () => {
-    return btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32))));
+    const code = btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32))));
+    return code.replaceAll("+", "-").replaceAll("/", "_").slice(0, -1);
 }
 export const getState = () => {
     return sessionStorage.getItem("state");

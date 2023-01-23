@@ -147,7 +147,11 @@ async def parse_token(token: str) -> str:
         verify = hmac_key.verify(message.encode(), decoded_signature)
 
         if verify:
-            # 正当なトークンの場合、有効期限を検証
+            # 正当なトークンの場合、audと有効期限を検証
+            if claims["token_use"] != "id" or settings.auth_client_id != claims["aud"]:
+                logger.debug(claims)
+                raise credentials_exception
+
             now = int(datetime.now().timestamp())
             if now > claims["exp"]:
                 # 期限切れ
