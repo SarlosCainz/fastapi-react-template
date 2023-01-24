@@ -1,3 +1,4 @@
+import jwtDecode from "jwt-decode";
 import axios from "axios";
 import * as models from "./models";
 
@@ -11,10 +12,19 @@ export const request = async (config, userContext, auth=true) => {
     let result = null;
     config.url = import.meta.env.VITE_API_URL + config.url;
     if (auth) {
+        let idToken = getIdTokeh();
+        // Check token expiration
+        const claims = jwtDecode(idToken);
+        const now = Math.floor(new Date().getTime() / 1000);
+        if (claims.exp <= now) {
+            // Expired
+            idToken = await refresh(refreshToken);
+        }
+
         if (!config.headers) {
             config.headers = {};
         }
-        config.headers.Authorization = "Bearer " + userContext.idToken;
+        config.headers.Authorization = "Bearer " + idToken;
     }
     for (let i = 0; i < 2; i++) {
         try {
@@ -23,18 +33,8 @@ export const request = async (config, userContext, auth=true) => {
         } catch (err) {
             console.log(err);
             if (auth === true && err.response.status === 401) {
-                const data = new URLSearchParams();
-                data.append("refresh_token", getRefreshTokeh());
-                const refreshConfig = {
-                    method: 'post',
-                    url: import.meta.env.VITE_API_URL + "auth/refresh",
-                    data: data
-                }
                 try {
-                    const res = await axios(refreshConfig);
-                    userContext.setIdToken(res.data.id_token);
-                    userContext.setAccessToken(res.data.access_token);
-                    config.headers.Authorization = "Bearer " + res.data.id_token;
+                    await refresh(refreshToken);
                 } catch(err) {
                     if (err.response.status === 401) {
                         userContext.logout();
@@ -50,6 +50,21 @@ export const request = async (config, userContext, auth=true) => {
     }
 
     return result;
+}
+
+const refresh = async (refreshToken) => {
+    const data = new URLSearchParams();
+    data.append("refresh_token", refreshToken);
+    const refreshConfig = {
+        method: 'post',
+        url: import.meta.env.VITE_API_URL + "auth/refresh",
+        data: data
+    }
+    const res = await axios(refreshConfig);
+    setIdToken(res.data.id_token);
+    setAccessToken(res.data.access_token);
+
+    return res.data.id_token;
 }
 
 export const getUser = () => {
@@ -106,7 +121,12 @@ export const setIdToken = (idToken) => {
     if (idToken === null) {
         sessionStorage.removeItem("idToken");
     } else {
-        sessionStorage.setItem("idToken", idToken);
+        const claims = jwtDecode(idToken);
+        if (claims.token_use === "id" && claims.aud === import.meta.env.VITE_AUTH_CLIENT_ID) {
+            sessionStorage.setItem("idToken", idToken);
+        } else {
+            throw "Could not validate credentials";
+        }
     }
 }
 
@@ -117,7 +137,12 @@ export const setAccessToken = (accessToken) => {
     if (accessToken === null) {
         sessionStorage.removeItem("accessToken");
     } else {
-        sessionStorage.setItem("accessToken", accessToken);
+        const claims = jwtDecode(accessToken);
+        if (claims.token_use === "access" && claims.client_id === import.meta.env.VITE_AUTH_CLIENT_ID) {
+            sessionStorage.setItem("accessToken", accessToken);
+        } else {
+            throw "Could not validate credentials";
+        }
     }
 }
 

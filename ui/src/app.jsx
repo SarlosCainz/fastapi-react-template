@@ -4,6 +4,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import {useNavigate, useLocation, Navigate, Routes, Route} from "react-router-dom";
 import {Snackbar, Alert, Backdrop, CircularProgress, Typography, Link} from '@mui/material';
 import {Helmet} from "react-helmet";
+import jwtDecode from "jwt-decode";
 
 import Header from "./components/Header";
 import Body from "./components/Body";
@@ -14,48 +15,31 @@ export const AppContext = React.createContext({});
 export const UserContext = React.createContext({});
 
 export function UserProvider({children}) {
-    const [idToken, setIdToken] = useState(util.getIdTokeh());
-    const [accessToken, setAccessToken] = useState(util.getAccessTokeh());
     const [user, setUser] = useState(util.getUser());
-    const [loggedIn, setLoggedIn] = useState(Boolean(accessToken));
+    const [loggedIn, setLoggedIn] = useState(util.getIdTokeh());
 
     const userContext = {
         loggedIn: loggedIn,
-        info: user,
-        setInfo: setUser,
-        idToken: idToken,
-        setIdToken: setIdToken,
-        accessToken: accessToken,
-        setAccessToken: (token) => {
-            setAccessToken(token);
-            util.setAccessToken(token);
+        userInfo: user,
+        setUserInfo: (info) => {
+            setUser(info);
+            util.setUser(info);
         },
         login: (user, id_token, access_token, refresh_token) => {
-            setUser(user);
-            setAccessToken(access_token);
-            setLoggedIn(true);
+            console.log("login");
 
-            util.setUser(user);
+            userContext.setUserInfo(user);
             util.setIdToken(id_token);
             util.setAccessToken(access_token);
             util.setRefreshToken(refresh_token);
-
-            if (user && access_token) {
-                setLoggedIn(true);
-            }
-        },
-        authHeader: {
-            headers: {
-                Authorization: "Bearer " + accessToken,
-            }
+            setLoggedIn(true);
         },
         logout: () => {
             console.log("logout");
-            setUser(models.User);
-            setIdToken(null);
-            setAccessToken(null);
+
             setLoggedIn(false);
-            util.setUser(null);
+            userContext.setUserInfo(models.User);
+            util.setIdToken(null);
             util.setAccessToken(null);
             util.setRefreshToken(null);
 
@@ -157,28 +141,28 @@ function App() {
         },
     });
 
-    useEffect(() => {
-        if (userContext.loggedIn) {
-            (async () => {
-                try {
-                    appContext.backdrop.open();
-                    const params = new FormData();
-                    params.append("access_token", userContext.accessToken);
-                    const config = {
-                        method: "post",
-                        url: "user/me",
-                        data: params,
-                    }
-                    const res = await util.request(config, userContext);
-                    userContext.setInfo(res.data);
-                } catch (err) {
-                    appContext.completed.err(err);
-                } finally {
-                    appContext.backdrop.close();
-                }
-            })();
-        }
-    }, [userContext.loggedIn]);
+    // useEffect(() => {
+    //     if (userContext.loggedIn) {
+    //         (async () => {
+    //             try {
+    //                 appContext.backdrop.open();
+    //                 const params = new FormData();
+    //                 params.append("access_token", userContext.accessToken);
+    //                 const config = {
+    //                     method: "post",
+    //                     url: "user/me",
+    //                     data: params,
+    //                 }
+    //                 const res = await util.request(config, userContext);
+    //                 userContext.setInfo(res.data);
+    //             } catch (err) {
+    //                 appContext.completed.err(err);
+    //             } finally {
+    //                 appContext.backdrop.close();
+    //             }
+    //         })();
+    //     }
+    // }, [userContext.loggedIn]);
 
     const callback = async (code) => {
         const params = new FormData();

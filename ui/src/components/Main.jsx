@@ -5,7 +5,7 @@ import {Typography} from "@mui/material"
 import {AppContext, UserContext} from "../app";
 import * as util from "../util";
 
-function Body() {
+function Main() {
     const appContext = useContext(AppContext);
     const userContext = useContext(UserContext);
 
@@ -43,4 +43,4 @@ function Body() {
     );
 }
 
-export default Body;
+export default Main;
