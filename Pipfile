@@ -16,7 +16,7 @@ python-jose = {extras = ["cryptography"], version = "*"}
 python-multipart = "*"
 boto3 = "*"
 gunicorn = "*"
-pydantic = "*"
+pydantic = {extras = ["email"], version = "*"}
 requests = "*"
 
 [requires]

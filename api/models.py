@@ -1,6 +1,6 @@
-from typing import Optional, List, Dict, Union
+from typing import Optional, List, Dict
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, HttpUrl, constr, EmailStr, conlist
 
 
 class Result(BaseModel):
@@ -12,11 +12,11 @@ class Result(BaseModel):
 
 
 class User(BaseModel):
-    username: str
-    email: Union[str, None] = None
-    full_name: Union[str, None] = None
-    picture: str = None
-    groups: List[str] = None
+    username: constr(max_length=30, regex=r"^[a-zA-Z0-9_]+$")
+    email: Optional[EmailStr] = None
+    full_name: Optional[constr(max_length=30)] = None
+    picture: Optional[HttpUrl] = None
+    groups: Optional[conlist(constr(to_lower=True), max_items=10)] = None
 
 
 class Token(BaseModel):
@@ -51,7 +51,7 @@ if __name__ == "__main__":
         file.write(f"export const {model_name} = {js};\n")
 
     def main():
-        import argparse, sys, util, datetime
+        import argparse, sys
 
         parser = argparse.ArgumentParser()
         parser.add_argument("-o", "--output", help="output file", default=sys.stdout)
