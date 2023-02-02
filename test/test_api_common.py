@@ -1,17 +1,6 @@
 from unittest import mock
-from fastapi.testclient import TestClient
-
-from auth import get_valid_token
-from app import app
+from test_app import client, TOKEN
 import models
-
-TOKEN = "some-token"
-client = TestClient(app)
-
-async def mock_get_valid_token():
-    return TOKEN
-
-app.dependency_overrides[get_valid_token] = mock_get_valid_token
 
 
 def test_hello():
